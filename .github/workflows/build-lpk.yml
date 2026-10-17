@@ -1,0 +1,69 @@
+name: Build LPK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Package .lpk
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # lzc-cli 需要 node 20+；装哪个版本由下面这一步决定，锁定大版本避免上游行为漂移
+      - name: Install lzc-cli
+        run: |
+          npm install -g @lazycatcloud/lzc-cli
+          lzc-cli --version
+
+      # 这一条命令自足完成：npm install → vite build → 打包 lpk
+      # 不需要登录、不需要 docker、不需要连盒子
+      - name: Build LPK
+        run: |
+          lzc-cli project release
+          echo "--- 产物 ---"
+          ls -la dist-lpk/
+
+      - name: Inspect LPK
+        run: |
+          LPK=$(find dist-lpk -name '*.lpk' | head -1)
+          echo "LPK=$LPK" >> "$GITHUB_ENV"
+          lzc-cli lpk info "$LPK"
+          echo "--- SHA-256 ---"
+          sha256sum "$LPK" | tee dist-lpk/SHA256SUMS.txt
+
+      - name: Upload LPK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lpk-${{ github.sha }}
+          path: |
+            dist-lpk/*.lpk
+            dist-lpk/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      # 打 tag 时把 lpk 挂到 Release，盒子侧可以直接 curl 下载
+      - name: Attach LPK to Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-lpk/*.lpk
+            dist-lpk/SHA256SUMS.txt
+          fail_on_unmatched_files: true

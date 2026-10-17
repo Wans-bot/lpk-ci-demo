@@ -1,0 +1,38 @@
+package: cloud.lazycat.app.lpkci
+version: 1.0.0
+name: CI 环境探针
+description: 由 GitHub Actions 构建的环境探针，用于验证 CI 出包与实机部署链路。
+author: wans
+license: MIT
+homepage: https://lazycat.cloud/
+min_os_version: 1.5.0
+
+# locales 必须同时有 zh-CN 与 en-US：
+# 本地 `lzc-cli project release` 只警告中文缺失，但开发者中心提审时会直接拒绝
+# （manifest locales doesn't have en），详见知识库 04-平台坑总表。
+locales:
+  zh-CN:
+    name: CI 环境探针
+    description: 由 GitHub Actions 构建的环境探针，用于验证 CI 出包与实机部署链路。
+    usage: |
+      打开应用即可看到当前设备的运行环境信息，包括访问域名、客户端平台、浏览器与版本、
+      视口与屏幕尺寸、语言与时区、网络状态。
+
+      页面下方的本地便签可以写入文字并保存，内容存放在浏览器本地，刷新页面或重启应用后仍然保留，
+      每次保存会显示保存时间。
+
+      「重新读取」按钮用于在改变窗口大小或网络状态后刷新环境信息；
+      「复制全部信息」按钮会把当前环境信息整理成 JSON 复制到剪贴板。
+  en-US:
+    name: CI Environment Probe
+    description: An environment probe built by GitHub Actions, used to verify the CI packaging and real-device deployment chain.
+    usage: |
+      Open the app to see the runtime details of the current device: access domain, client
+      platform, browser and version, viewport and screen size, language and timezone, and
+      network status.
+
+      The local note below can be written and saved. It is kept in the browser, so it survives
+      page reloads and app restarts, and each save shows the saved time.
+
+      Refresh re-collects the environment details after you resize the window or change the
+      network; Copy all copies the current details as JSON to the clipboard.
